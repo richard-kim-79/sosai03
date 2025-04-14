@@ -1,0 +1,40 @@
+services:
+  - type: web
+    name: mcp-server
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MCP_API_KEY
+        sync: false
+      - key: MCP_MODEL_ID
+        value: gpt-4
+      - key: MCP_MAX_TOKENS
+        value: 4096
+      - key: MCP_TEMPERATURE
+        value: 0.7
+      - key: CORS_ORIGIN
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: DATABASE_SSL
+        value: true
+      - key: ENCRYPTION_KEY
+        sync: false
+      - key: ENCRYPTION_IV
+        sync: false
+    healthCheckPath: /api/health
+    autoDeploy: true
+    plan: starter
+    region: singapore
+    scaling:
+      minInstances: 1
+      maxInstances: 1
+    disk:
+      name: data
+      mountPath: /data
+      sizeGB: 1 
