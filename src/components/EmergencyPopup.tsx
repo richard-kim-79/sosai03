@@ -1,82 +1,112 @@
-import { useState } from 'react';
-import { Dialog } from '@headlessui/react';
-import { useRiskStore } from '@/store/riskStore';
-import { UserInfo } from '@/types/risk';
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { AlertCircle } from 'lucide-react';
 
-export default function EmergencyPopup() {
-  const { showEmergencyPopup, setShowEmergencyPopup, setUserInfo } = useRiskStore();
-  const [formData, setFormData] = useState<UserInfo>({
+interface EmergencyPopupProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: EmergencyInfo) => void;
+}
+
+interface EmergencyInfo {
+  name: string;
+  contact: string;
+  address?: string;
+}
+
+const EmergencyPopup: React.FC<EmergencyPopupProps> = ({ isOpen, onClose, onSubmit }) => {
+  const [formData, setFormData] = useState<EmergencyInfo>({
     name: '',
     contact: '',
-    address: '',
+    address: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setUserInfo(formData);
-    setShowEmergencyPopup(false);
-    // TODO: 서버로 데이터 전송
+    
+    try {
+      // 이메일 알림 전송
+      const response = await fetch('/api/notifications/email', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userInfo: formData,
+          adminEmail: process.env.NEXT_PUBLIC_ADMIN_EMAIL,
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error('이메일 알림 전송에 실패했습니다.');
+      }
+
+      onSubmit(formData);
+      onClose();
+    } catch (error) {
+      console.error('알림 전송 중 오류가 발생했습니다:', error);
+      // 오류가 발생해도 사용자 정보는 저장
+      onSubmit(formData);
+      onClose();
+    }
   };
 
   return (
-    <Dialog
-      open={showEmergencyPopup}
-      onClose={() => setShowEmergencyPopup(false)}
-      className="relative z-50"
-    >
-      <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-      <div className="fixed inset-0 flex items-center justify-center p-4">
-        <Dialog.Panel className="mx-auto max-w-sm rounded bg-white p-6">
-          <Dialog.Title className="text-lg font-medium mb-4">
-            긴급 연락처 정보
-          </Dialog.Title>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                이름 또는 별명
-              </label>
-              <input
-                type="text"
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                연락처 (전화번호/이메일)
-              </label>
-              <input
-                type="text"
-                required
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.contact}
-                onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">
-                주소/학교 (선택)
-              </label>
-              <input
-                type="text"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                value={formData.address}
-                onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-              />
-            </div>
-            <div className="mt-4">
-              <button
-                type="submit"
-                className="w-full rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                제출하기
-              </button>
-            </div>
-          </form>
-        </Dialog.Panel>
-      </div>
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 text-red-500" />
+            <span>긴급 지원이 필요합니다</span>
+          </DialogTitle>
+        </DialogHeader>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <label htmlFor="name" className="text-sm font-medium">
+              이름 또는 별명
+            </label>
+            <Input
+              id="name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              placeholder="이름 또는 별명을 입력해주세요"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="contact" className="text-sm font-medium">
+              연락처
+            </label>
+            <Input
+              id="contact"
+              value={formData.contact}
+              onChange={(e) => setFormData({ ...formData, contact: e.target.value })}
+              placeholder="전화번호 또는 이메일을 입력해주세요"
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <label htmlFor="address" className="text-sm font-medium">
+              주소 또는 학교 (선택)
+            </label>
+            <Input
+              id="address"
+              value={formData.address}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+              placeholder="주소 또는 학교를 입력해주세요"
+            />
+          </div>
+          <DialogFooter>
+            <Button type="submit" className="w-full bg-red-500 hover:bg-red-600">
+              도움 요청하기
+            </Button>
+          </DialogFooter>
+        </form>
+      </DialogContent>
     </Dialog>
   );
-} 
+};
+
+export default EmergencyPopup; 

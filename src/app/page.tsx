@@ -22,14 +22,8 @@ export default function Home() {
   }, [riskLevel, setShowEmergencyPopup]);
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="w-full max-w-4xl">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          익명 기반 위기 대응 AI 챗봇
-        </h1>
-        <ChatInterface />
-      </div>
-      <EmergencyPopup />
+    <main>
+      <h1>SOS AI</h1>
     </main>
   );
 }
