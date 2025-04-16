@@ -7,6 +7,30 @@ services:
     envVars:
       - key: NODE_ENV
         value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: sosai03-db
+          property: connectionString
+      - key: DB_HOST
+        fromDatabase:
+          name: sosai03-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: sosai03-db
+          property: port
+      - key: DB_USER
+        fromDatabase:
+          name: sosai03-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: sosai03-db
+          property: password
+      - key: DB_NAME
+        fromDatabase:
+          name: sosai03-db
+          property: database
     healthCheckPath: /
     autoDeploy: true
     plan: starter
@@ -17,4 +41,11 @@ services:
     disk:
       name: data
       mountPath: /data
-      sizeGB: 1 
+      sizeGB: 1
+
+databases:
+  - name: sosai03-db
+    databaseName: sosai03
+    user: sosai03
+    plan: starter
+    region: singapore 
