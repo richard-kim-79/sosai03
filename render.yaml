@@ -1,33 +1,13 @@
 services:
   - type: web
-    name: mcp-server
+    name: sosai03
     env: node
     buildCommand: npm install && npm run build
     startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10000
-      - key: MCP_API_KEY
-        sync: false
-      - key: MCP_MODEL_ID
-        value: gpt-4
-      - key: MCP_MAX_TOKENS
-        value: 4096
-      - key: MCP_TEMPERATURE
-        value: 0.7
-      - key: CORS_ORIGIN
-        sync: false
-      - key: DATABASE_URL
-        value: postgresql://mcp_user:your_password@dpg-cn1234567890-a.singapore-postgres.render.com/mcp_database
-      - key: DATABASE_SSL
-        value: true
-      - key: ENCRYPTION_KEY
-        value: 122b820da482d0a8984310fa115e1f963d2500fffc5b3218b0e0df72c8c9f102
-      - key: ENCRYPTION_IV
-        value: 1e7c872c24c8ffb5f5ea661e473b1ccf
-    healthCheckPath: /api/health
+    healthCheckPath: /
     autoDeploy: true
     plan: starter
     region: singapore
