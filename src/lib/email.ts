@@ -16,19 +16,17 @@ interface EmailOptions {
   html?: string;
 }
 
-export async function sendEmail(options: EmailOptions) {
+export async function sendEmail(to: string, subject: string, html: string) {
   try {
-    const mailOptions = {
+    await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      ...options,
-    };
-
-    const info = await transporter.sendMail(mailOptions);
-    console.log('이메일이 성공적으로 전송되었습니다:', info.messageId);
-    return { success: true, messageId: info.messageId };
+      to,
+      subject,
+      html,
+    });
   } catch (error) {
-    console.error('이메일 전송 중 오류가 발생했습니다:', error);
-    return { success: false, error };
+    console.error('이메일 전송 중 오류 발생:', error);
+    throw new Error('이메일 전송에 실패했습니다.');
   }
 }
 
@@ -62,4 +60,26 @@ ${userInfo.address ? `- 주소: ${userInfo.address}` : ''}
       <p>즉시 확인하고 대응해주시기 바랍니다.</p>
     `,
   };
+}
+
+export function createEmergencyEmailMessage(
+  name: string,
+  phone: string,
+  location?: string,
+  message?: string
+) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+      <h2 style="color: #dc3545;">🚨 위기 상황 알림</h2>
+      <div style="background-color: #f8f9fa; padding: 20px; border-radius: 5px;">
+        <p><strong>이름:</strong> ${name}</p>
+        <p><strong>전화번호:</strong> ${phone}</p>
+        ${location ? `<p><strong>위치:</strong> ${location}</p>` : ''}
+        ${message ? `<p><strong>메시지:</strong> ${message}</p>` : ''}
+      </div>
+      <p style="color: #6c757d; font-size: 0.9em; margin-top: 20px;">
+        이 이메일은 자동으로 발송되었습니다. 즉시 조치가 필요합니다.
+      </p>
+    </div>
+  `;
 } 

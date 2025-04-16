@@ -3,6 +3,27 @@ import { prisma } from '@/lib/prisma';
 import { emergencyAlertSchema, emergencyAlertUpdateSchema } from '@/lib/validations';
 import { z } from 'zod';
 
+/**
+ * @swagger
+ * /api/emergency-alerts:
+ *   get:
+ *     summary: 특정 사용자의 비상 알림 목록을 조회합니다.
+ *     parameters:
+ *       - in: query
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: 비상 알림 목록 조회 성공
+ *       400:
+ *         description: 잘못된 요청
+ *       404:
+ *         description: 사용자를 찾을 수 없음
+ *       500:
+ *         description: 서버 오류
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -41,6 +62,34 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/emergency-alerts:
+ *   post:
+ *     summary: 새로운 비상 알림을 생성합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: string
+ *               location:
+ *                 type: string
+ *     responses:
+ *       201:
+ *         description: 비상 알림 생성 성공
+ *       400:
+ *         description: 잘못된 요청
+ *       404:
+ *         description: 사용자를 찾을 수 없음
+ *       500:
+ *         description: 서버 오류
+ */
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -82,6 +131,36 @@ export async function POST(request: Request) {
   }
 }
 
+/**
+ * @swagger
+ * /api/emergency-alerts:
+ *   patch:
+ *     summary: 비상 알림의 상태를 업데이트합니다.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - id
+ *               - status
+ *             properties:
+ *               id:
+ *                 type: string
+ *               status:
+ *                 type: string
+ *                 enum: [pending, resolved, cancelled]
+ *     responses:
+ *       200:
+ *         description: 비상 알림 상태 업데이트 성공
+ *       400:
+ *         description: 잘못된 요청
+ *       404:
+ *         description: 비상 알림을 찾을 수 없음
+ *       500:
+ *         description: 서버 오류
+ */
 export async function PATCH(request: Request) {
   try {
     const body = await request.json();
