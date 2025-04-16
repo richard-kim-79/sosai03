@@ -21,7 +21,50 @@ jobs:
       - name: Build
         run: npm run build
         
-      - name: Deploy to Render
+      - name: Configure Render
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          RENDER_SERVICE_ID: ${{ secrets.RENDER_SERVICE_ID }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          ADMIN_EMAIL: ${{ secrets.ADMIN_EMAIL }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASSWORD: ${{ secrets.EMAIL_PASSWORD }}
         run: |
-          curl -fsSL https://render.com/download/cli.sh | bash
-          render deploy --service-id ${{ secrets.RENDER_SERVICE_ID }} --api-key ${{ secrets.RENDER_API_KEY }} 
+          # Render 서비스 환경 변수 설정
+          curl -X PATCH "https://api.render.com/v1/services/$RENDER_SERVICE_ID" \
+            -H "Authorization: Bearer $RENDER_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "envVars": [
+                {
+                  "key": "OPENAI_API_KEY",
+                  "value": "'"$OPENAI_API_KEY"'",
+                  "sync": false
+                },
+                {
+                  "key": "SLACK_WEBHOOK_URL",
+                  "value": "'"$SLACK_WEBHOOK_URL"'",
+                  "sync": false
+                },
+                {
+                  "key": "ADMIN_EMAIL",
+                  "value": "'"$ADMIN_EMAIL"'",
+                  "sync": false
+                },
+                {
+                  "key": "EMAIL_USER",
+                  "value": "'"$EMAIL_USER"'",
+                  "sync": false
+                },
+                {
+                  "key": "EMAIL_PASSWORD",
+                  "value": "'"$EMAIL_PASSWORD"'",
+                  "sync": false
+                }
+              ]
+            }'
+          
+          # Render 서비스 재배포
+          curl -X POST "https://api.render.com/v1/services/$RENDER_SERVICE_ID/deploys" \
+            -H "Authorization: Bearer $RENDER_API_KEY" 

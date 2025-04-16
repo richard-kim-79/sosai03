@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sosai03
+    name: sosai-web
     env: node
     buildCommand: npm install && npm run build
     startCommand: npm start
@@ -9,28 +9,18 @@ services:
         value: production
       - key: DATABASE_URL
         fromDatabase:
-          name: sosai03-db
+          name: sosai-db
           property: connectionString
-      - key: DB_HOST
-        fromDatabase:
-          name: sosai03-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: sosai03-db
-          property: port
-      - key: DB_USER
-        fromDatabase:
-          name: sosai03-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: sosai03-db
-          property: password
-      - key: DB_NAME
-        fromDatabase:
-          name: sosai03-db
-          property: database
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SLACK_WEBHOOK_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: EMAIL_USER
+        sync: false
+      - key: EMAIL_PASSWORD
+        sync: false
     healthCheckPath: /
     autoDeploy: true
     plan: starter
@@ -44,8 +34,7 @@ services:
       sizeGB: 1
 
 databases:
-  - name: sosai03-db
-    databaseName: sosai03
-    user: sosai03
-    plan: starter
-    region: singapore 
+  - name: sosai-db
+    databaseName: sosai
+    user: sosai
+    plan: free 
